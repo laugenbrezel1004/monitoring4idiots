@@ -1,3 +1,7 @@
+mod systeminfo;
+mod daemon;
+
 fn main() {
-    println!("Hello, world!");
+    daemon::run_daemon();
 }
+
