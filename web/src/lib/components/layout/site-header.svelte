@@ -2,7 +2,7 @@
 	import { Separator } from "$lib/components/ui/separator";
 	import * as Sidebar from "$lib/components/ui/sidebar";
 	import { page } from '$app/state';
-	import { ThemeSwitcher } from '$lib/components/theme/index.js';
+	import { ThemeSwitcher } from '$lib/components/theme';
 </script>
 
 <header
