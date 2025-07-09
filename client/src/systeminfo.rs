@@ -1,67 +1,70 @@
-use json::object;
-use std::fs;
-use std::fs::OpenOptions;
-use std::io::Write;
+use log::info;
+use serde_json::json;
 use std::thread::sleep;
 use std::time::Duration;
-use log::warn;
-use sysinfo::{Components, Disks, Networks, System};
-pub fn run() -> Result<(), String> {
-    loop {
-        let mut sys = System::new();
+use sysinfo::{Disks, Networks, System};
+use thiserror::Error;
 
-        sys.refresh_all();
+#[derive(Error, Debug)]
+pub enum SystemInfoError {
+    #[error("Failed to write system info: {0}")]
+    WriteError(String),
+}
 
-        // Display processes ID, name and disk usage:
-        //for (pid, process) in sys.processes() {
-        //  println!("[{pid}] {:?} {:?}", process.name(), process.disk_usage());
-        //}
+pub fn run() -> Result<(), SystemInfoError> {
+    let mut sys = System::new_all();
+    sys.refresh_all();
 
-        let payload_systeminfo = object! {
-          "system_name":  System::name(),
-        "system_kernel_version": System::kernel_version(),
-          "system_os_version": System::os_version(),
-          "system_host_name": System::host_name(),
-        "cpus": sys.cpus().len(),
-        };
+    let disks = Disks::new_with_refreshed_list();
+    let disk_info: Vec<_> = disks
+        .iter()
+        .map(|disk| {
+            json!({
+                "name": disk.name().to_string_lossy(),
+                "mount_point": disk.mount_point().to_string_lossy(),
+                "total_space": disk.total_space(),
+                "available_space": disk.available_space(),
+            })
+        })
+        .collect();
 
-        let payload_ram = object! {
-        "total_memory": sys.total_memory(),
-        "used_memory": sys.used_memory(),
-        "total_swap": sys.total_swap(),
-        "used_swap": sys.used_swap(),
-        };
+    let networks = Networks::new_with_refreshed_list();
+    let network_info: Vec<_> = networks
+        .iter()
+        .map(|(name, data)| {
+            json!({
+                "interface": name,
+                "received": data.total_received(),
+                "transmitted": data.total_transmitted(),
+            })
+        })
+        .collect();
 
-        //TODO: Disks in array für json packen?
-        //        let disks = Disks::new_with_refreshed_list();
-        //        for disk in &disks {
-        //            println!("{disk:?}");
-        //        }
-        //        let payload_disks = object! {
-        //       }
-        //  let payload_networks = object! {
+    let payload = json!({
+        "system": {
+            "name": System::name().unwrap_or_default(),
+            "kernel_version": System::kernel_version().unwrap_or_default(),
+            "os_version": System::os_version().unwrap_or_default(),
+            "host_name": System::host_name().unwrap_or_default(),
+            "cpus": sys.cpus().len(),
+        },
+        "memory": {
+            "total_memory": sys.total_memory(),
+            "used_memory": sys.used_memory(),
+            "total_swap": sys.total_swap(),
+            "used_swap": sys.used_swap(),
+        },
+        "disks": disk_info,
+        "networks": network_info,
+    });
 
-        // Network interfaces name, total data received and total data transmitted:
-        // let networks = Networks::new_with_refreshed_list();
-        // println!("=> networks:");
-        // for (interface_name, data) in &networks {
-        //   println!(
-        //     "{interface_name}: {} B (down) / {} B (up)",
-        //   data.total_received(),
-        // data.total_transmitted(),
-        //  );
-        // If you want the amount of data received/transmitted since last call
-        // to `Networks::refresh`, use `received`/`transmitted`.
-        //  }
-        //  }
+    // Schreibe JSON in Log
+    info!(
+        "System info: {}",
+        serde_json::to_string_pretty(&payload)
+            .map_err(|e| SystemInfoError::WriteError(format!("Failed to serialize JSON: {}", e)))?
+    );
 
-        let mut stdout_file = OpenOptions::new()
-            .write(true) // Enable write mode
-            .create(true) // Create the file if it doesn't exist
-            .append(true) // Append instead of overwriting (optional, remove if you want to truncate)
-            .open("/tmp/daemon.out")
-            .map_err(|e| e.to_string())?;
-        stdout_file.write(payload_systeminfo.to_string().as_bytes()).map_err(|e| e.to_string())?;
-        sleep(Duration::from_secs(5));
-    }
+    sleep(Duration::from_secs(5));
+    Ok(())
 }

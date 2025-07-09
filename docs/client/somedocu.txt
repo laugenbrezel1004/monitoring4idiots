@@ -1,186 +1,226 @@
-**Documentation for System Monitoring Daemon**
-==============================================
+Monitoring4Idiots Daemon Documentation
+Overview
+The monitoring4idiots daemon is a system monitoring tool written in Rust, designed to collect and log system information such as CPU, memory, disk, and network usage. It runs as a background daemon process on Linux systems, managed via systemd. The provided Bash installation script sets up the necessary environment, including user, group, directories, and the systemd service.
+Installation Script
+The Bash script (install.sh) automates the setup process for the monitoring4idiots daemon. It must be executed with root privileges.
+Purpose
+The script:
 
-**Overview**
-------------
+Creates a dedicated system user and group for the daemon.
+Sets up directories for logs and PID files.
+Copies the daemon binary and systemd unit file to appropriate system locations.
+Configures permissions and ownership.
+Enables and starts the systemd service.
 
-This is a Rust-based system monitoring daemon that collects and reports system information, including disk usage, network activity, and system resources. The daemon runs in the background and periodically updates the system information.
+Usage
 
-**Modules**
-------------
+Ensure the monitoring4idiots binary (target/release/monitoring4idiots) and systemd unit file (monitoring4idiots.service) are present in the same directory as the script.
+Run the script as root:sudo ./install.sh
 
-### `daemon`
 
-This module is responsible for daemonizing the process and handling the system information collection.
+The script will:
+Check for root privileges.
+Create the monitoring4idiots group and user if they do not exist.
+Create and configure /var/log/monitoring4idiots and /var/run/monitoring4idiots directories.
+Copy the binary to /usr/bin/monitoring4idiots and the systemd unit file to /etc/systemd/system/monitoring4idiots.service.
+Enable and start the monitoring4idiots service.
 
-#### `run_daemon`
 
-This function daemonizes the process and starts the system information collection.
 
-```rust
-/// Run the daemon and start collecting system information.
-pub fn run_daemon() {
-    // ...
+Script Breakdown
+
+Variables:
+DAEMON_USER and DAEMON_GROUP: System user and group (monitoring4idiots).
+DAEMON_BINARY: Path to the daemon binary (/usr/bin/monitoring4idiots).
+LOG_DIR and PID_DIR: Directories for logs and PID files.
+SYSTEMD_UNIT: Path to the systemd unit file.
+BINARY_SRC and SYSTEMD_SRC: Source paths for the binary and unit file.
+
+
+Steps:
+Checks if the script is run as root.
+Creates the system group if it doesn't exist.
+Creates the system user (no home directory, no login shell) if it doesn't exist.
+Creates log and PID directories with appropriate permissions (750, owned by monitoring4idiots:monitoring4idiots).
+Copies the binary to /usr/bin, sets ownership to root:root, and permissions to 755.
+Copies the systemd unit file, sets ownership to root:root, and permissions to 644.
+Reloads systemd, enables, and starts the service.
+
+
+
+Error Handling
+
+Uses set -e to exit on any error.
+Checks for the existence of the binary and unit file, exiting with an error if not found.
+Uses || true in initial commands to prevent failures if the user or group already exists.
+
+Systemd Unit File
+The monitoring4idiots.service file defines how the daemon is managed by systemd.
+Content
+[Unit]
+Description=Monitoring4Idiots Daemon
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/monitoring4idiots
+Restart=always
+User=monitoring4idiots
+Group=monitoring4idiots
+PIDFile=/var/run/monitoring4idiots/monitoring4idiots.pid
+Environment=RUST_LOG=info
+
+[Install]
+WantedBy=multi-user.target
+
+Details
+
+Unit:
+Description: Describes the daemon.
+After: Ensures the daemon starts after network services are available.
+
+
+Service:
+ExecStart: Specifies the binary to execute.
+Restart: Configures the daemon to restart automatically on failure.
+User and Group: Runs the daemon as the monitoring4idiots user and group.
+PIDFile: Specifies the PID file location.
+Environment: Sets the logging level to info.
+
+
+Install:
+WantedBy: Ensures the service starts at boot in multi-user mode.
+
+
+
+Rust Daemon Implementation
+The monitoring4idiots daemon is implemented in Rust, using several modules to handle system information collection, logging, and daemonization.
+Directory Structure
+
+src/main.rs: Entry point, initializes logging and starts the daemon.
+src/core.rs: Handles logging initialization and constants for file paths.
+src/daemon.rs: Manages daemonization and signal handling.
+src/systeminfo.rs: Collects and logs system information.
+
+Dependencies
+Defined in Cargo.toml:
+
+daemonize: For running the process as a daemon.
+log and simplelog: For logging to a file.
+signal-hook: For handling system signals (e.g., SIGTERM, SIGHUP).
+sysinfo: For collecting system metrics.
+thiserror: For custom error types.
+serde_json: For serializing system information to JSON.
+
+Main Functionality
+
+Logging (core.rs):
+Initializes a logger that writes to /var/log/monitoring4idiots/monitoring4idiots.log.
+Creates log directories if they don't exist.
+Configures logging at the info level.
+
+
+System Information (systeminfo.rs):
+Collects data on:
+System: Name, kernel version, OS version, hostname, CPU count.
+Memory: Total and used memory, total and used swap.
+Disks: Name, mount point, total and available space.
+Networks: Interface name, total received and transmitted data.
+
+
+Serializes data to JSON and logs it every 5 seconds.
+
+
+Daemon (daemon.rs):
+Uses daemonize to run as a background process.
+Sets up stdout (monitoring4idiots.out) and stderr (monitoring4idiots.err) files.
+Handles SIGTERM and SIGHUP signals for graceful shutdown.
+Runs the systeminfo::run function in a loop until terminated.
+
+
+Main (main.rs):
+Initializes logging and starts the daemon.
+
+
+
+Error Handling
+
+Custom error types (SystemInfoError and DaemonError) for specific failure cases.
+Graceful exit with error messages logged to stderr if initialization fails.
+
+Future Improvements
+The provided code includes suggestions for enhancements, which are summarized here:
+
+Dedicated User/Group: Already implemented in the script.
+Log Rotation:
+Use logrotate to manage log file size.
+Example configuration:/var/log/monitoring4idiots/monitoring4idiots.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 640 monitoring4idiots monitoring4idiots
 }
-```
 
-### `systeminfo`
 
-This module is responsible for collecting system information.
 
-#### `run`
 
-This function runs the system information collection loop.
+Configuration File:
+Use a TOML file (e.g., /etc/monitoring4idiots/config.toml) for configurable settings like log path and collection interval.
+Parse with serde and toml crates.
 
-```rust
-/// Run the system information collection loop.
-pub fn run() {
-    // ...
-}
-```
 
-**System Information Collection**
--------------------------------
+Metrics Export:
+Integrate the prometheus crate to expose metrics via an HTTP endpoint (e.g., /metrics on port 9100).
 
-The system information collection is done using the `sysinfo` crate. The collected information includes:
 
-* Disk usage
-* Network activity
-* System resources (CPU, memory, etc.)
+Graceful Shutdown:
+Implement resource cleanup in a Drop trait for the daemon.
 
-### `Disks`
 
-This struct represents the disk information.
+Network Security:
+Restrict access to potential future HTTP endpoints using iptables or nftables.
 
-```rust
-/// Disk information.
-let disks = Disks::new_with_refreshed_list();
-for disk in &disks {
-    println!("{:?}", disk);
-}
-```
 
-### `System`
+Unit Tests:
+Add tests for systeminfo.rs to verify data collection.
 
-This struct represents the system information.
 
-```rust
-/// System information.
-let sys = System::new();
-sys.refresh_all();
-println!("{:?}", sys);
-```
+Documentation:
+Add Rust doc comments (///) for better code maintainability.
 
-**JSON Payload**
-----------------
 
-The system information is collected and stored in JSON payloads.
+Robust Error Handling:
+Use fallback values for missing system information to prevent crashes.
 
-### `payload_systeminfo`
 
-This JSON payload contains the system information.
 
-```json
-{
-    "system_name": "example",
-    "system_kernel_version": "5.10.0-13-generic",
-    "system_os_version": "Ubuntu 20.04.1 LTS",
-    "system_host_name": "example",
-    "cpus": 4
-}
-```
+Prerequisites
 
-### `payload_ram`
+Linux system with systemd.
+Rust and Cargo for building the binary.
+Root privileges for running the installation script.
+The monitoring4idiots binary and systemd unit file must be present.
 
-This JSON payload contains the RAM information.
+Files Created
 
-```json
-{
-    "total_memory": 16284,
-    "used_memory": 5324,
-    "total_swap": 0,
-    "used_swap": 0
-}
-```
+/usr/bin/monitoring4idiots: Daemon binary.
+/etc/systemd/system/monitoring4idiots.service: Systemd unit file.
+/var/log/monitoring4idiots/monitoring4idiots.log: Log file.
+/var/log/monitoring4idiots/monitoring4idiots.out: Stdout file.
+/var/log/monitoring4idiots/monitoring4idiots.err: Stderr file.
+/var/run/monitoring4idiots/monitoring4idiots.pid: PID file.
 
-### `payload_disks`
+Troubleshooting
 
-This JSON payload contains the disk information.
+Script fails with "not found" errors: Ensure target/release/monitoring4idiots and monitoring4idiots.service exist.
+Permission issues: Verify the script is run as root (sudo).
+Service fails to start: Check logs (journalctl -u monitoring4idiots.service) and ensure directories and files have correct permissions.
+Log file not created: Verify /var/log/monitoring4idiots is writable by the monitoring4idiots user.
 
-```json
-{
-    // ...
-}
-```
+Notes
 
-**Usage**
------
-
-To use this daemon, simply run the `main` function.
-
-```rust
-fn main() {
-    daemon::run_daemon();
-}
-```
-
-This will start the daemon and begin collecting system information.
-
-**Configuration**
------------------
-
-The daemon can be configured by modifying the `daemonize` function.
-
-```rust
-let daemonize = Daemonize::new()
-    .pid_file("/var/run/monitoring4idiots.pid")
-    .working_directory("/tmp")
-    .user("nobody")
-    .group("daemon")
-    .umask(0o777);
-```
-
-This configuration sets the PID file, working directory, user, group, and umask for the daemon.
-
-**Troubleshooting**
-------------------
-
-If you encounter any issues with the daemon, check the logs for error messages.
-
-```bash
-tail -f /var/log/syslog
-```
-
-You can also use the `dbg` macro to print debug messages.
-
-```rust
-dbg!(sys);
-```
-
-This will print the system information to the console.
-
-**API Documentation**
-----------------------
-
-The API documentation for this crate can be found [here](https://docs.rs/sysinfo/0.21.2/sysinfo/).
-
-**License**
--------
-
-This crate is licensed under the MIT license.
-
-**Contributing**
-----------------
-
-Contributions to this crate are welcome. Please submit a pull request with your changes.
-
-**Authors**
-----------
-
-* [Your Name](https://github.com/yourusername)
-
-**Acknowledgments**
-------------------
-
-* [sysinfo](https://crates.io/crates/sysinfo)
-* [daemonize](https://crates.io/crates/daemonize)
+The daemon assumes a Linux environment with systemd and does not support other init systems.
+The binary must be built with Rust in release mode (cargo build --release) before running the script.
+Log rotation and configuration files are recommended for production use to manage log size and flexibility.

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+groupadd --system monitoring4idiots || true
+useradd --system --gid monitoring4idiots --no-create-home --shell /usr/sbin/nologin monitoring4idiots || true
+mkdir -p /var/log/monitoring4idiots /var/run/monitoring4idiots
+chown monitoring4idiots:monitoring4idiots /var/log/monitoring4idiots /var/run/monitoring4idiots
+chmod 750 /var/log/monitoring4idiots /var/run/monitoring4idiots
