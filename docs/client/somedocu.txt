@@ -1,0 +1,186 @@
+**Documentation for System Monitoring Daemon**
+==============================================
+
+**Overview**
+------------
+
+This is a Rust-based system monitoring daemon that collects and reports system information, including disk usage, network activity, and system resources. The daemon runs in the background and periodically updates the system information.
+
+**Modules**
+------------
+
+### `daemon`
+
+This module is responsible for daemonizing the process and handling the system information collection.
+
+#### `run_daemon`
+
+This function daemonizes the process and starts the system information collection.
+
+```rust
+/// Run the daemon and start collecting system information.
+pub fn run_daemon() {
+    // ...
+}
+```
+
+### `systeminfo`
+
+This module is responsible for collecting system information.
+
+#### `run`
+
+This function runs the system information collection loop.
+
+```rust
+/// Run the system information collection loop.
+pub fn run() {
+    // ...
+}
+```
+
+**System Information Collection**
+-------------------------------
+
+The system information collection is done using the `sysinfo` crate. The collected information includes:
+
+* Disk usage
+* Network activity
+* System resources (CPU, memory, etc.)
+
+### `Disks`
+
+This struct represents the disk information.
+
+```rust
+/// Disk information.
+let disks = Disks::new_with_refreshed_list();
+for disk in &disks {
+    println!("{:?}", disk);
+}
+```
+
+### `System`
+
+This struct represents the system information.
+
+```rust
+/// System information.
+let sys = System::new();
+sys.refresh_all();
+println!("{:?}", sys);
+```
+
+**JSON Payload**
+----------------
+
+The system information is collected and stored in JSON payloads.
+
+### `payload_systeminfo`
+
+This JSON payload contains the system information.
+
+```json
+{
+    "system_name": "example",
+    "system_kernel_version": "5.10.0-13-generic",
+    "system_os_version": "Ubuntu 20.04.1 LTS",
+    "system_host_name": "example",
+    "cpus": 4
+}
+```
+
+### `payload_ram`
+
+This JSON payload contains the RAM information.
+
+```json
+{
+    "total_memory": 16284,
+    "used_memory": 5324,
+    "total_swap": 0,
+    "used_swap": 0
+}
+```
+
+### `payload_disks`
+
+This JSON payload contains the disk information.
+
+```json
+{
+    // ...
+}
+```
+
+**Usage**
+-----
+
+To use this daemon, simply run the `main` function.
+
+```rust
+fn main() {
+    daemon::run_daemon();
+}
+```
+
+This will start the daemon and begin collecting system information.
+
+**Configuration**
+-----------------
+
+The daemon can be configured by modifying the `daemonize` function.
+
+```rust
+let daemonize = Daemonize::new()
+    .pid_file("/var/run/monitoring4idiots.pid")
+    .working_directory("/tmp")
+    .user("nobody")
+    .group("daemon")
+    .umask(0o777);
+```
+
+This configuration sets the PID file, working directory, user, group, and umask for the daemon.
+
+**Troubleshooting**
+------------------
+
+If you encounter any issues with the daemon, check the logs for error messages.
+
+```bash
+tail -f /var/log/syslog
+```
+
+You can also use the `dbg` macro to print debug messages.
+
+```rust
+dbg!(sys);
+```
+
+This will print the system information to the console.
+
+**API Documentation**
+----------------------
+
+The API documentation for this crate can be found [here](https://docs.rs/sysinfo/0.21.2/sysinfo/).
+
+**License**
+-------
+
+This crate is licensed under the MIT license.
+
+**Contributing**
+----------------
+
+Contributions to this crate are welcome. Please submit a pull request with your changes.
+
+**Authors**
+----------
+
+* [Your Name](https://github.com/yourusername)
+
+**Acknowledgments**
+------------------
+
+* [sysinfo](https://crates.io/crates/sysinfo)
+* [daemonize](https://crates.io/crates/daemonize)
