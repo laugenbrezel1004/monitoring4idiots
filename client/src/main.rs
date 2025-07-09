@@ -1,7 +1,11 @@
 mod systeminfo;
 mod daemon;
+mod core;
 
 fn main() {
-    daemon::run_daemon();
+
+    if let Err(e)  = daemon::run_daemon() {
+        eprintln!("error running daemon: {:?}", e);
+    }
 }
 
