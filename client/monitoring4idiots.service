@@ -1,0 +1,14 @@
+[Unit]
+Description=The client for the monitoring4idiots system
+After=network.target
+SuccessAction=reboot
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/node /opt/myapp/index.js
+WorkingDirectory=/opt/myapp
+Restart=on-failure
+User=appuser
+Environment=NODE_ENV=production
+StandardOutput=journal
+StandardError=journal

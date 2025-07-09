@@ -1,63 +1,59 @@
+use json::object;
 use std::thread::sleep;
 use std::time::Duration;
-use sysinfo::{
-   Components, Disks, Networks, System,
-};
+use sysinfo::{Components, Disks, Networks, System};
 pub fn run() {
-   loop {
-      println!("System info:");
-      let mut sys = System::new();
+    loop {
+        let mut sys = System::new();
 
-      sys.refresh_all();
+        sys.refresh_all();
 
-      println!("=> system:");
-      // RAM and swap information:
-      println!("total memory: {} bytes", sys.total_memory());
-      println!("used memory : {} bytes", sys.used_memory());
-      println!("total swap  : {} bytes", sys.total_swap());
-      println!("used swap   : {} bytes", sys.used_swap());
+        // Display processes ID, name and disk usage:
+        //for (pid, process) in sys.processes() {
+        //  println!("[{pid}] {:?} {:?}", process.name(), process.disk_usage());
+        //}
 
+        // We display all disks' information:
+        println!("=> disks:");
+        let disks = Disks::new_with_refreshed_list();
+        for disk in &disks {
+            println!("{disk:?}");
+        }
 
-      // Display system information:
-      println!("System name:             {:?}", System::name());
-      println!("System kernel version:   {:?}", System::kernel_version());
-      println!("System OS version:       {:?}", System::os_version());
-      println!("System host name:        {:?}", System::host_name());
+        let payload_systeminfo = object! {
+          "system_name":  System::name(),
+        "system_kernel_version": System::kernel_version(),
+          "system_os_version": System::os_version(),
+          "system_host_name": System::host_name(),
+        "cpus": sys.cpus().len(),
+        };
 
-      // Number of CPUs:
-      println!("NB CPUs: {}", sys.cpus().len());
+        let payload_ram = object! {
+        "total_memory": sys.total_memory(),
+        "used_memory": sys.used_memory(),
+        "total_swap": sys.total_swap(),
+        "used_swap": sys.used_swap(),
+        };
 
-      // Display processes ID, name and disk usage:
-      //for (pid, process) in sys.processes() {
-      //  println!("[{pid}] {:?} {:?}", process.name(), process.disk_usage());
-      //}
+        let payload_disks = object! {
 
-      // We display all disks' information:
-      println!("=> disks:");
-      let disks = Disks::new_with_refreshed_list();
-      for disk in &disks {
-         println!("{disk:?}");
-      }
+        }
+        //  let payload_networks = object! {
 
-      // Network interfaces name, total data received and total data transmitted:
-      let networks = Networks::new_with_refreshed_list();
-      println!("=> networks:");
-      for (interface_name, data) in &networks {
-         println!(
-            "{interface_name}: {} B (down) / {} B (up)",
-            data.total_received(),
-            data.total_transmitted(),
-         );
-         // If you want the amount of data received/transmitted since last call
-         // to `Networks::refresh`, use `received`/`transmitted`.
-      }
+        // Network interfaces name, total data received and total data transmitted:
+        // let networks = Networks::new_with_refreshed_list();
+        // println!("=> networks:");
+        // for (interface_name, data) in &networks {
+          //   println!(
+            //     "{interface_name}: {} B (down) / {} B (up)",
+              //   data.total_received(),
+                // data.total_transmitted(),
+           //  );
+            // If you want the amount of data received/transmitted since last call
+            // to `Networks::refresh`, use `received`/`transmitted`.
+       //  }
+        //  }
 
-      // Components temperature:
-      // let components = Components::new_with_refreshed_list();
-      //  println!("=> components:");
-      //   for component in &components {
-      //        println!("{component:?}");
-      //   }
-      sleep(Duration::from_secs(5));
-   }
+        sleep(Duration::from_secs(5));
+    }
 }
