@@ -12,8 +12,6 @@
 
 	let { user }: NavUserProps = $props();
 
-	console.log(user.avatarUrl);
-
 	const sidebar = Sidebar.useSidebar();
 </script>
 

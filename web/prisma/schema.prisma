@@ -27,7 +27,7 @@ model User {
   sessions Session[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Account {
@@ -40,7 +40,7 @@ model Account {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, provider])
 }
@@ -54,5 +54,74 @@ model Session {
   userId String
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Host {
+  id   String @id @default(uuid())
+  name String @unique
+
+  systemInfo    SystemInfo[]
+  memoryInfo    MemoryInfo[]
+  diskInfo      DiskInfo[]
+  interfaceInfo InterfaceInfo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model SystemInfo {
+  kernelVersion String
+  osVersion     String
+
+  host   Host   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId String
+
+  timestamp DateTime @default(now())
+
+  @@id([hostId, timestamp])
+}
+
+model MemoryInfo {
+  totalMemory     Float @default(0)
+  availableMemory Float @default(0)
+  usedMemory      Float @default(0)
+
+  totalSwap     Float @default(0)
+  availableSwap Float @default(0)
+  usedSwap      Float @default(0)
+
+  host   Host   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId String
+
+  timestamp DateTime @default(now())
+
+  @@id([hostId, timestamp])
+}
+
+model DiskInfo {
+  name           String
+  mountPoint     String?
+  totalSpace     Float   @default(0)
+  availableSpace Float   @default(0)
+
+  host   Host   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId String
+
+  timestamp DateTime @default(now())
+
+  @@id([hostId, timestamp, name])
+}
+
+model InterfaceInfo {
+  name            String
+  dataReceived    Float  @default(0)
+  dataTransmitted Float  @default(0)
+
+  host   Host   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  hostId String
+
+  timestamp DateTime @default(now())
+
+  @@id([hostId, timestamp, name])
 }
