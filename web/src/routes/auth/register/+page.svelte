@@ -7,7 +7,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { registerSchema } from '$lib/schemas/register';
 	import { FormControl, FormField, FormFieldErrors } from '$lib/components/ui/form';
-	import { Github } from '@lucide/svelte';
+	import {Github, UserPlus} from '@lucide/svelte';
 
 	let { data } = $props();
 
@@ -20,12 +20,43 @@
 
 <form method="POST" class="p-6 md:p-8" use:enhance>
 	<div class="flex flex-col gap-4">
-		<div class="flex flex-col items-center text-center">
+		<div class="flex flex-row justify-center items-center gap-2 text-center">
+			<UserPlus class="size-6 stroke-primary" />
 			<h1 class="text-2xl font-bold">
 				{messages['auth.register']()}
 			</h1>
 		</div>
-		<div class="grid gap-2">
+		<div class="grid gap-2 pt-4">
+			<div class="grid grid-cols-2 gap-2">
+				<FormField {form} name="firstName">
+					<FormControl>
+						{#snippet children({ props })}
+							<Label>{messages['common.firstname']()}</Label>
+							<Input
+									{...props}
+									bind:value={$formData.firstName}
+									placeholder="John"
+									autocomplete="given-name"
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
+				<FormField {form} name="lastName">
+					<FormControl>
+						{#snippet children({ props })}
+							<Label>{messages['common.lastname']()}</Label>
+							<Input
+									{...props}
+									bind:value={$formData.lastName}
+									placeholder="Doe"
+									autocomplete="family-name"
+							/>
+						{/snippet}
+					</FormControl>
+					<FormFieldErrors />
+				</FormField>
+			</div>
 			<FormField {form} name="email">
 				<FormControl>
 					{#snippet children({ props })}
@@ -49,6 +80,7 @@
 								bind:value={$formData.password}
 								placeholder="********"
 								autocomplete="current-password"
+								type="password"
 						/>
 					{/snippet}
 				</FormControl>
@@ -81,16 +113,9 @@
 		</div>
 		<div class="text-center text-sm">
 			{messages['auth.has-account']()}
-			<a href="/auth/login" class="underline underline-offset-4">
+			<a href="/auth/login" class="text-primary hover:underline underline-offset-4">
 				{messages['auth.login']()}
 			</a>
 		</div>
 	</div>
 </form>
-<div class="relative hidden bg-muted sm:block">
-	<img
-		src="/images/placeholder.svg"
-		alt="cover"
-		class="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-	/>
-</div>

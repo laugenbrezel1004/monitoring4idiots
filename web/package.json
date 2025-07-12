@@ -37,6 +37,7 @@
 		"svelte": "^5.0.0",
 		"svelte-adapter-bun": "^0.5.2",
 		"svelte-check": "^4.0.0",
+		"sveltekit-flash-message": "^2.4.6",
 		"tailwind-variants": "^1.0.0",
 		"tailwindcss": "^4.0.0",
 		"tw-animate-css": "^1.3.5",
@@ -53,6 +54,7 @@
 		"@prisma/client": "^6.11.1",
 		"@tabler/icons-svelte": "^3.34.0",
 		"arctic": "^3.7.0",
+		"bcryptjs": "^3.0.2",
 		"d3-scale": "^4.0.2",
 		"d3-shape": "^3.2.0",
 		"formsnap": "^2.0.1",
@@ -60,7 +62,7 @@
 		"mode-watcher": "^1.1.0",
 		"oslo": "^1.2.1",
 		"svelte-flag-icons": "^2.0.1",
-		"sveltekit-flash-message": "^2.4.6",
+		"svelte-sonner": "^1.0.5",
 		"sveltekit-superforms": "^2.27.1"
 	}
 }

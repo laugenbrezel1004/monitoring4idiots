@@ -3,6 +3,7 @@
 	import AppSidebar from '$lib/components/layout/app-sidebar.svelte';
 	import SiteHeader from '$lib/components/layout/site-header.svelte';
 	import { SIDEBAR_COOKIE_MAX_AGE, SIDEBAR_COOKIE_NAME } from '$lib/components/ui/sidebar/constants';
+	import {Toaster} from "$lib/components/ui/sonner";
 
 	let { children, data } = $props();
 
@@ -11,6 +12,8 @@
 		document.cookie = `${SIDEBAR_COOKIE_NAME}=${state}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
 	});
 </script>
+
+<Toaster richColors position="bottom-right" />
 
 <Sidebar.Provider
 	bind:open={state}

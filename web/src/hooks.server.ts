@@ -8,6 +8,11 @@ import {
 import { sequence } from '@sveltejs/kit/hooks';
 import { redirect } from 'sveltekit-flash-message/server';
 
+const AUTH_ROUTES = [
+	'/auth/login',
+	'/auth/register'
+];
+
 const paraglideHandle: Handle = ({ event, resolve }) =>
 	paraglideMiddleware(event.request, ({ request: localizedRequest, locale }) => {
 		event.request = localizedRequest;
@@ -45,7 +50,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 	event.locals.user = user;
 	event.locals.session = session;
 
-	if (!event.locals.session || !event.locals.user) {
+	if ((!event.locals.session || !event.locals.user) && !AUTH_ROUTES.includes(event.url.pathname)) {
 		return redirect(302, '/auth/login', { type: 'error', message: 'Please log in first!' }, event);
 	}
 

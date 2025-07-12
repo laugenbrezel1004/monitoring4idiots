@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button';
-	import { Github } from '@lucide/svelte';
+	import { Github, LogIn } from '@lucide/svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { loginSchema } from '$lib/schemas/login';
@@ -20,12 +20,13 @@
 
 <form method="POST" class="p-6 md:p-8" use:enhance>
 	<div class="flex flex-col gap-4">
-		<div class="flex flex-col items-center text-center">
+		<div class="flex flex-row justify-center items-center gap-2 text-center">
+			<LogIn class="size-6 stroke-primary" />
 			<h1 class="text-2xl font-bold">
 				{messages['auth.login']()}
 			</h1>
 		</div>
-		<div class="grid gap-2">
+		<div class="grid gap-2 pt-4">
 			<FormField {form} name="email">
 				<FormControl>
 					{#snippet children({ props })}
@@ -49,6 +50,7 @@
 								bind:value={$formData.password}
 								placeholder="********"
 								autocomplete="current-password"
+								type="password"
 						/>
 					{/snippet}
 				</FormControl>
@@ -81,7 +83,7 @@
 		</div>
 		<div class="text-center text-sm">
 			{messages['auth.no-account']()}
-			<a href="/auth/register" class="underline underline-offset-4">
+			<a href="/auth/register" class="text-primary hover:underline underline-offset-4">
 				{messages['auth.register']()}
 			</a>
 		</div>

@@ -32,12 +32,14 @@ export const actions = {
 		}
 
 		if (!user || !user.password) {
+			console.log('User or Password is null!')
 			setFlash({ type: 'error', message: messages['auth.error.invalid-credentials']() }, event);
 			return fail(400, { form });
 		}
 
 		try {
 			const isSuccess = await verifyPassword(user.password, String(password));
+			console.log(isSuccess);
 			if (!isSuccess) {
 				setFlash({ type: 'error', message: messages['auth.error.invalid-credentials']() }, event);
 				return fail(400, { form });
