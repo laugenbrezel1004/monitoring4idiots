@@ -5,7 +5,7 @@
 	import type {ComponentProps} from "svelte";
 	import type {User} from "@prisma/client";
 
-	let { user, ...restProps }: { user: User } & ComponentProps<typeof Sidebar.Root> = $props();
+	let { user, ...restProps }: { user: User | null } & ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -27,6 +27,8 @@
 		<NavMain />
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<NavUser user={user} />
+		{#if user}
+			<NavUser user={user} />
+		{/if}
 	</Sidebar.Footer>
 </Sidebar.Root>
