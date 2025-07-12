@@ -6,6 +6,7 @@ import { createUserByProvider, getUserByProvider } from '$lib/server/data/user';
 import type { User } from '@prisma/client';
 import { redirect } from 'sveltekit-flash-message/server';
 import { m as messages } from '$lib/i18n/messages';
+import {prisma} from "$lib/server/prisma";
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	const code = event.url.searchParams.get('code');
@@ -64,6 +65,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	const existingUser = await getUserByProvider('github', String(githubUserId));
 	if (existingUser) {
+		await prisma.user.update({
+			where: {
+				id: existingUser.id,
+			},
+			data: {
+				name: githubUser.name ?? githubUser.login,
+				avatarUrl: githubUser.avatar_url,
+			}
+		});
+
 		const sessionToken = generateSessionToken();
 		const session = await createSession(sessionToken, existingUser.id);
 		setSessionTokenCookie(event, sessionToken, session.expiresAt);
@@ -77,8 +88,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	let user: User | null;
 	try {
-		user = await createUserByProvider(email.email, email.verified, 'github', String(githubUserId));
+		user = await createUserByProvider(email.email, email.verified, githubUser.name ?? githubUser.login, 'github', String(githubUserId));
 		if (!user) error(500, { message: messages['auth.error.unexpected']() });
+		await prisma.user.update({
+			where: {
+				id: user.id,
+			},
+			data: {
+				avatarUrl: githubUser.avatar_url,
+			}
+		});
 	} catch (err) {
 		console.error(err);
 		return error(500, { message: messages['auth.error.unexpected']() });

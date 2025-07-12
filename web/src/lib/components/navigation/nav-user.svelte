@@ -1,14 +1,16 @@
 <script lang="ts">
-	import CreditCardIcon from "@tabler/icons-svelte/icons/credit-card";
-	import DotsVerticalIcon from "@tabler/icons-svelte/icons/dots-vertical";
-	import LogoutIcon from "@tabler/icons-svelte/icons/logout";
-	import NotificationIcon from "@tabler/icons-svelte/icons/notification";
-	import UserCircleIcon from "@tabler/icons-svelte/icons/user-circle";
 	import * as Avatar from "$lib/components/ui/avatar";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import * as Sidebar from "$lib/components/ui/sidebar";
+	import {Box, EllipsisVertical, LogOut} from "@lucide/svelte";
+	import {userNavItems} from "$lib/components/navigation/index";
+	import type {User} from "@prisma/client";
 
-	let { user }: { user: { name: string; email: string; avatar: string } } = $props();
+	type NavUserProps = {
+		user: User;
+	}
+
+	let { user }: NavUserProps = $props();
 
 	const sidebar = Sidebar.useSidebar();
 </script>
@@ -23,8 +25,8 @@
 						size="lg"
 						class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 					>
-						<Avatar.Root class="size-8 rounded-lg grayscale">
-							<Avatar.Image src={user.avatar} alt={user.name} />
+						<Avatar.Root class="size-8 rounded-lg">
+							<Avatar.Image src={user.avatarUrl} alt={user.name} />
 							<Avatar.Fallback class="rounded-lg">{user.name.split(" ").map((p) => p[0]).toString().replace(',', '')}</Avatar.Fallback>
 						</Avatar.Root>
 						<div class="grid flex-1 text-left text-sm leading-tight">
@@ -33,7 +35,7 @@
 								{user.email}
 							</span>
 						</div>
-						<DotsVerticalIcon class="ml-auto size-4" />
+						<EllipsisVertical class="ml-auto size-4" />
 					</Sidebar.MenuButton>
 				{/snippet}
 			</DropdownMenu.Trigger>
@@ -46,7 +48,7 @@
 				<DropdownMenu.Label class="p-0 font-normal">
 					<div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
 						<Avatar.Root class="size-8 rounded-lg">
-							<Avatar.Image src={user.avatar} alt={user.name} />
+							<Avatar.Image src={user.avatarUrl} alt={user.name} />
 							<Avatar.Fallback class="rounded-lg">{user.name.split(" ").map((p) => p[0]).toString().replace(',', '')}</Avatar.Fallback>
 						</Avatar.Root>
 						<div class="grid flex-1 text-left text-sm leading-tight">
@@ -59,16 +61,23 @@
 				</DropdownMenu.Label>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Group>
-					<DropdownMenu.Item>
-						<UserCircleIcon />
-						Account
-					</DropdownMenu.Item>
+					{#each userNavItems as item (item.href)}
+						{@const Icon = item.icon ?? Box}
+						<a href={`/app/${item.href}`}>
+							<DropdownMenu.Item>
+								<Icon />
+								{item.title}
+							</DropdownMenu.Item>
+						</a>
+					{/each}
 				</DropdownMenu.Group>
 				<DropdownMenu.Separator />
-				<DropdownMenu.Item>
-					<LogoutIcon />
-					Log out
-				</DropdownMenu.Item>
+				<a href="/auth/logout">
+					<DropdownMenu.Item>
+						<LogOut />
+						Log out
+					</DropdownMenu.Item>
+				</a>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</Sidebar.MenuItem>

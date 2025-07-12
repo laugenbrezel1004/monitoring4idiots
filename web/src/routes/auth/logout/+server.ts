@@ -3,8 +3,8 @@ import { redirect } from 'sveltekit-flash-message/server';
 import { m as messages } from '$lib/i18n/messages';
 
 export const GET = async (event) => {
-	if (event.locals.session === null)
-		return redirect(
+	if (!event.locals.session || !event.locals.session.id)
+		throw redirect(
 			302,
 			'/auth/login',
 			{ type: 'error', message: messages['auth.error.already-logged-out']() },

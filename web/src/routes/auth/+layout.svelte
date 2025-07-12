@@ -15,7 +15,7 @@
 		>
 			<Clapperboard class="p-1" />
 		</div>
-		Movies
+		Monitoring
 	</a>
 	<div class="w-full max-w-sm md:max-w-md">
 		<div class="flex flex-col gap-6">

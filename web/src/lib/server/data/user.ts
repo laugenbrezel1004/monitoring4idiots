@@ -28,6 +28,7 @@ export async function getUserByProvider(
 export async function createUserByProvider(
 	email: string,
 	emailVerified: boolean,
+	name: string,
 	provider: string,
 	providerAccountId: string,
 	password?: string
@@ -45,6 +46,7 @@ export async function createUserByProvider(
 			data: {
 				email,
 				emailVerified,
+				name,
 				password: password ? password : null,
 				accounts: {
 					create: {

@@ -6,6 +6,7 @@ import { createUserByProvider, getUserByProvider } from '$lib/server/data/user';
 import type { User } from '@prisma/client';
 import { redirect } from 'sveltekit-flash-message/server';
 import { m as messages } from '$lib/i18n/messages';
+import {prisma} from "$lib/server/prisma";
 
 export async function GET(event: RequestEvent): Promise<Response> {
 	const code = event.url.searchParams.get('code');
@@ -44,17 +45,23 @@ export async function GET(event: RequestEvent): Promise<Response> {
 		);
 	}
 
-	const claims = decodeIdToken(tokens.idToken());
-	// @ts-expect-error weird types...
-	const googleUserId = claims.sub;
-	// @ts-expect-error weird types...
+	const claims: any = decodeIdToken(tokens.idToken());
+	const googleUserId = claims.sub as string;
 	const email = claims.email as string;
-	// @ts-expect-error weird types...
 	const emailVerified = claims.email_verified as boolean;
-	console.log(claims);
 
 	const existingUser = await getUserByProvider('google', googleUserId);
 	if (existingUser) {
+		await prisma.user.update({
+			where: {
+				id: existingUser.id,
+			},
+			data: {
+				name: claims.name,
+				avatarUrl: claims.picture,
+			}
+		});
+
 		const sessionToken = generateSessionToken();
 		const session = await createSession(sessionToken, existingUser.id);
 		setSessionTokenCookie(event, sessionToken, session.expiresAt);
@@ -68,8 +75,16 @@ export async function GET(event: RequestEvent): Promise<Response> {
 
 	let user: User | null;
 	try {
-		user = await createUserByProvider(email, emailVerified, 'google', String(googleUserId));
+		user = await createUserByProvider(email, emailVerified, claims.name, 'google', String(googleUserId));
 		if (!user) error(500, { message: messages['auth.error.unexpected']() });
+		await prisma.user.update({
+			where: {
+				id: user.id,
+			},
+			data: {
+				avatarUrl: claims.picture,
+			}
+		});
 	} catch (err) {
 		console.error(err);
 		return error(500, { message: messages['auth.error.unexpected']() });
