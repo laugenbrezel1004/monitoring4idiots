@@ -1,36 +1,11 @@
 <script lang="ts">
-	import NavMain from "./nav-main.svelte";
-	import NavUser from "./nav-user.svelte";
+	import {NavMain, NavUser} from "$lib/components/navigation";
 	import * as Sidebar from "$lib/components/ui/sidebar";
 	import {Boxes, Cpu, LayoutDashboard, Users} from '@lucide/svelte';
 	import type {ComponentProps} from "svelte";
+	import type {User} from "@prisma/client";
 
-	const data = {
-		user: {
-			name: "Philip Krauß",
-			email: "kontakt@philipkrauss.it",
-			avatar: "/avatars/asd.jpg",
-		},
-		navMain: [
-			{
-				title: "Dashboard",
-				url: "#",
-				icon: LayoutDashboard,
-			},
-			{
-				title: "Hosts",
-				url: "#",
-				icon: Boxes,
-			},
-			{
-				title: "Users",
-				url: "#",
-				icon: Users,
-			},
-		],
-	};
-
-	let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+	let { user, ...restProps }: { user: User } & ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -49,9 +24,9 @@
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain items={data.navMain} />
+		<NavMain />
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<NavUser user={data.user} />
+		<NavUser user={user} />
 	</Sidebar.Footer>
 </Sidebar.Root>

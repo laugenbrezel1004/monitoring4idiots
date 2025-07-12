@@ -20,7 +20,7 @@
 	class="transition-none duration-0"
 	style="--sidebar-width: calc(var(--spacing) * 72); --header-height: calc(var(--spacing) * 12);"
 >
-	<AppSidebar variant="inset" />
+	<AppSidebar user={data.user} variant="inset" />
 	<Sidebar.Inset>
 		<SiteHeader />
 		<div class="flex flex-1 flex-col">
