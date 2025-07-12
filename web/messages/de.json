@@ -1,4 +1,37 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from de!"
+	"corporation": {
+		"name": "Monitoring"
+	},
+	"common": {
+		"firstname": "Vorname",
+		"lastname": "Nachname",
+		"email": "Email",
+		"password": "Passwort",
+		"tos": "Nutzungsbedingungen",
+		"privacy": "Datenschutzrichtlinie"
+	},
+	"auth": {
+		"login": "Anmelden",
+		"register": "Registrieren",
+		"separator": "oder weiter mit",
+		"forgot-password": "Passwort vergessen?",
+		"no-account": "Du hast noch keinen Account?",
+		"has-account": "Du hast bereits einen Account?",
+		"legal": "Wenn Sie fortfahren, stimmen Sie unseren {tos} und unserer {privacy} zu.",
+		"success": {
+			"account-created": "Account erstellt! Bitte melde dich an",
+			"first-login": "Willkommen bei Monitoring!",
+			"login": "Willkommen zurück!",
+			"logged-out": "Abmeldung erfolgreich!"
+		},
+		"error": {
+			"unexpected": "Ein unerwarteter Fehler ist aufgetreten!",
+			"invalid-credentials": "Ungültige Anmeldedaten!",
+			"no-email": "Email Adresse konnte nicht geladen werden!",
+			"account-exists": "Account existiert bereits!",
+			"account-is-oauth": "Account ist mit einem OAuth-Provider verbunden!",
+			"already-logged-out": "Du bist bereits angemeldet!"
+		}
+	}
 }

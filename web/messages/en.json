@@ -1,4 +1,37 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from en!"
+	"corporation": {
+		"name": "Monitoring"
+	},
+	"common": {
+		"firstname": "Firstname",
+		"lastname": "Surname",
+		"email": "Email",
+		"password": "Password",
+		"tos": "Terms of Service",
+		"privacy": "Privacy Policy"
+	},
+	"auth": {
+		"login": "Login",
+		"register": "Register",
+		"separator": "or continue with",
+		"forgot-password": "Forgot your password?",
+		"no-account": "Don't have an account?",
+		"has-account": "Already have an account?",
+		"legal": "By clicking continue, you agree to our {tos} and {privacy}.",
+		"success": {
+			"account-created": "Account created! You can log in now",
+			"first-login": "Welcome to Monitoring!",
+			"login": "Welcome back!",
+			"logged-out": "Successfully logged out!"
+		},
+		"error": {
+			"unexpected": "An unexpected error occurred!",
+			"invalid-credentials": "Invalid credentials!",
+			"no-email": "Unable to get primary email address!",
+			"account-exists": "Account already exists!",
+			"account-is-oauth": "Account is already connected via OAuth!",
+			"already-logged-out": "You are already logged out!"
+		}
+	}
 }
