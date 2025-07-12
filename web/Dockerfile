@@ -48,4 +48,6 @@ COPY scripts ./scripts
 
 EXPOSE 3000
 
+RUN bunx prisma db push
+
 CMD ["bash", "scripts/start-app.sh"]
