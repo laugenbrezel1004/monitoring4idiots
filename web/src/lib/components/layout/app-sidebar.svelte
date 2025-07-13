@@ -1,21 +1,26 @@
 <script lang="ts">
 	import {NavMain, NavUser} from "$lib/components/navigation";
 	import * as Sidebar from "$lib/components/ui/sidebar";
-	import {Boxes, Cpu, LayoutDashboard, Users} from '@lucide/svelte';
+	import {Activity} from '@lucide/svelte';
 	import type {ComponentProps} from "svelte";
 	import type {User} from "@prisma/client";
 
-	let { user, ...restProps }: { user: User | null } & ComponentProps<typeof Sidebar.Root> = $props();
+	let {
+		user,
+		ref = $bindable(null),
+		collapsible = "icon",
+		...restProps
+	}: { user: User | null } & ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
-<Sidebar.Root collapsible="offcanvas" {...restProps}>
+<Sidebar.Root {collapsible} {...restProps}>
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton class="data-[slot=sidebar-menu-button]:!p-1.5">
+				<Sidebar.MenuButton>
 					{#snippet child({ props })}
 						<a href="/app" {...props}>
-							<Cpu class="!size-5 text-primary" />
+							<Activity class="!size-5 text-primary" />
 							<span class="text-base font-semibold">Monitoring</span>
 						</a>
 					{/snippet}
