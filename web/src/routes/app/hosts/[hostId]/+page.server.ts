@@ -45,6 +45,7 @@ export const load = async (event) => {
     return {
         host,
         memoryData,
+        processorData: memoryData,
         swapData,
     }
 }
