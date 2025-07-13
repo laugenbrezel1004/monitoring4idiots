@@ -1,8 +1,7 @@
 <script lang="ts">
     import * as Card from '$lib/components/ui/card';
-    import { Badge } from '$lib/components/ui/badge';
 
-    import { Users, Cpu } from '@lucide/svelte';
+    import { Users, Cpu, Boxes } from '@lucide/svelte';
 
     let { data } = $props();
 </script>
@@ -21,12 +20,12 @@
     </Card.Root>
     <Card.Root class="@container/card">
         <Card.Header>
-            <Card.Description>Total Hosts</Card.Description>
+            <Card.Description>Running Hosts</Card.Description>
             <Card.Title class="@[250px]/card:text-3xl text-2xl font-semibold tabular-nums">
-                {data.hostsCount ?? 0}
+                {data.onlineHostsCount ?? 0}
             </Card.Title>
             <Card.Action>
-                <Cpu class="size-4 stroke-muted-foreground" />
+                <Boxes class="size-4 stroke-muted-foreground" />
             </Card.Action>
         </Card.Header>
     </Card.Root>

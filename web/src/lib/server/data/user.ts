@@ -33,6 +33,7 @@ export async function createUserByProvider(
 	providerAccountId: string,
 	password?: string
 ): Promise<User | null> {
+	console.log(`Create called: ${provider} - ${providerAccountId} - ${email} - ${password}`)
 	const user = await prisma.user.findUnique({
 		where: {
 			email
@@ -47,7 +48,7 @@ export async function createUserByProvider(
 				email,
 				emailVerified,
 				name,
-				password: password ? password : null,
+				password: password ?? null,
 				accounts: {
 					create: {
 						provider,

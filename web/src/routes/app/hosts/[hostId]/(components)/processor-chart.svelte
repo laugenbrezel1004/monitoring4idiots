@@ -6,7 +6,7 @@
     import {Area, AreaChart, ChartClipPath} from "layerchart";
     import {curveNatural} from "d3-shape";
     import {cubicInOut} from "svelte/easing";
-    import {MemoryStick} from '@lucide/svelte';
+    import {Cpu} from '@lucide/svelte';
 
     let {data} = $props();
 
@@ -43,9 +43,8 @@
     console.log(data);
 
     const chartConfig = {
-        totalMemory: {label: "Total Memory", color: "var(--chart-1)"},
-        availableMemory: {label: "Available Memory", color: "var(--chart-2)"},
-        usedMemory: {label: "Used Memory", color: "var(--chart-3)"},
+        availableCpu: {label: "Available Processors", color: "var(--chart-1)"},
+        usedCpu: {label: "Used Processors", color: "var(--chart-2)"},
     } satisfies Chart.ChartConfig;
 </script>
 
@@ -53,8 +52,8 @@
     <Card.Header class="flex items-center gap-2 space-y-0 border-b sm:flex-row">
         <div class="grid flex-1 gap-1 text-center sm:text-left">
             <Card.Title class="flex flex-row gap-2 items-center">
-                <MemoryStick class="size-5 stroke-muted-foreground" />
-                Memory
+                <Cpu class="size-5 stroke-muted-foreground" />
+                CPU
             </Card.Title>
             <!--<Card.Description>Showing memory usage</Card.Description>-->
         </div>
@@ -68,19 +67,14 @@
                     xScale={scaleUtc()}
                     series={[
                           {
-                            key: "totalMemory",
-                            label: "Total Memory",
-                            color: chartConfig.totalMemory.color,
+                            key: "availableCpu",
+                            label: "Available CPU",
+                            color: chartConfig.availableCpu.color,
                           },
                           {
-                            key: "availableMemory",
-                            label: "Available Memory",
-                            color: chartConfig.availableMemory.color,
-                          },
-                          {
-                            key: "usedMemory",
-                            label: "Used Memory",
-                            color: chartConfig.usedMemory.color,
+                            key: "usedCpu",
+                            label: "Used CPU",
+                            color: chartConfig.usedCpu.color,
                           },
                         ]}
                     seriesLayout="stack"

@@ -10,6 +10,7 @@
 		DropdownMenuTrigger
 	} from '$lib/components/ui/dropdown-menu';
 	import type { Component } from 'svelte';
+	import {cn} from "$lib/utils";
 
 	type Locale = {
 		value: 'de' | 'en';
@@ -33,7 +34,7 @@
 </script>
 
 <DropdownMenu>
-	<DropdownMenuTrigger class={buttonVariants({ variant: 'outline', size: 'icon' })}>
+	<DropdownMenuTrigger class={cn(buttonVariants({ variant: 'outline', size: 'icon' }), 'size-8')}>
 		<selectedLocale.icon />
 		<span class="sr-only">Change locale</span>
 	</DropdownMenuTrigger>
