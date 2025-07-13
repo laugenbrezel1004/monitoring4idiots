@@ -2,8 +2,10 @@ use log::info;
 use serde_json::json;
 use std::thread::sleep;
 use std::time::Duration;
+use http::request;
 use sysinfo::{Disks, Networks, System};
 use thiserror::Error;
+use http::{Request, Response};
 
 #[derive(Error, Debug)]
 pub enum SystemInfoError {
@@ -64,6 +66,16 @@ pub fn run() -> Result<(), SystemInfoError> {
         serde_json::to_string_pretty(&payload)
             .map_err(|e| SystemInfoError::WriteError(format!("Failed to serialize JSON: {}", e)))?
     );
+
+    //TODO: Mehr umgebungsvarialben/ env file arbeiten in zukunft
+    let request = http::Request::builder()
+        .uri("http://localhost:3000/api/data/system")
+        .header("system", "json/1.0")
+        .body(payload.to_string())
+        .map_err(|e| SystemInfoError::WriteError(format!("Failed to build request: {}", e)))?;
+
+    let response = send
+
 
     sleep(Duration::from_secs(5));
     Ok(())

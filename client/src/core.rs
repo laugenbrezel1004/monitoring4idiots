@@ -7,6 +7,7 @@ pub const PID_FILE: &str = "/var/run/monitoring4idiots/monitoring4idiots.pid";
 pub const LOG_FILE: &str = "/var/log/monitoring4idiots/monitoring4idiots.log";
 pub const STDOUT_FILE: &str = "/var/log/monitoring4idiots/monitoring4idiots.out";
 pub const STDERR_FILE: &str = "/var/log/monitoring4idiots/monitoring4idiots.err";
+pub const URL_SERVER: &str = "http://localhost:3000";
 
 pub fn init_logging() -> Result<(), String> {
     // Erstelle das Verzeichnis für Logdateien, falls es nicht existiert

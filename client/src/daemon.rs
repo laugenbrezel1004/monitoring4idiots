@@ -3,8 +3,8 @@ use crate::systeminfo;
 use daemonize::Daemonize;
 use log::{error, info};
 use std::fs::File;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
