@@ -1,10 +1,10 @@
 use log::info;
-use reqwest::Client;
+use reqwest::{Client, Response};
 use serde_json::json;
-use std::thread::sleep;
 use std::time::Duration;
 use sysinfo::{Disks, Networks, System};
 use thiserror::Error;
+use tokio::time::sleep; // Verwende tokio::time::sleep statt std::thread::sleep
 
 #[derive(Error, Debug)]
 pub enum SystemInfoError {
@@ -13,38 +13,66 @@ pub enum SystemInfoError {
 }
 
 pub async fn run() -> Result<(), String> {
-    #[deprecated(since = "0.1.0", note = "Please use Client::builder()")]
-    let client = Client::new();
+    let api_data: String = String::from("http://localhost:3000/api/data");
+    //TODO: api/hosts/register???
     loop {
+        build_response(
+            json!({
+                "id": System::host_name().unwrap_or_default(),
+                "kernelVersion": System::kernel_version().unwrap_or_default(),
+                "osVersion": System::os_version().unwrap_or_default(),
+            }),
+            format!("{api_data}/system"),
+        )
+        .await;
+
         let mut sys = System::new_all();
         sys.refresh_all();
 
+        build_response(
+            json!({
+                "id": System::host_name().unwrap_or_default(),
+                "totalMemory": sys.total_memory(),
+                "usedMemory": sys.used_memory(),
+                "totalSwap": sys.total_swap(),
+                "usedSwap": sys.used_swap(),
+            }),
+            format!("{api_data}/memory"),
+        )
+        .await;
+        /*
+                build_response(
+                    json!({
+                        "id": System::host_name().unwrap_or_default(),
+                        "name":
+                    }),
+                    format!("{api_data}/interface"),
+                ).await;
 
-        let payload_system = json!({
-            "id": System::host_name(),
-            "kernelVersion": System::kernel_version(),
-            "osVersion": System::os_version(),
-            });
-        println!("{}", payload_system);
+        */
+        // Warte 5 Sekunden (asynchron)
+        sleep(Duration::from_secs(5)).await;
+    }
 
+    // Unerreichbar wegen der unendlichen Schleife, aber für die Typenkorrektheit
+    Ok(())
+}
 
-        let response = client
-            .post("http://localhost:3000/api/data/system")
-            .json(&payload_system)
-            .send()
-            .await.map_err(|e| e.to_string())?;
+async fn build_response(payload: serde_json::Value, api: String) {
+    let client = Client::new();
 
-        // Überprüfe den Statuscode
-        if response.status().is_success() {
-            println!("Antwort: {:?}", response);
-        } else {
-            println!("Fehler: {:?}", response.text().await);
+    match client
+        .post(api)
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| e.to_string())
+    {
+        Ok(response) => {
+            println!("Response: {:?}", response);
         }
-
-
-        //TODO: Mehr umgebungsvarialben/ env file arbeiten in zukunft
-
-
-       // sleep(Duration::from_secs(5));
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
     }
 }
