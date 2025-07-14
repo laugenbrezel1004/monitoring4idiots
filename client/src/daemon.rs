@@ -50,7 +50,7 @@ pub fn run_daemon() -> Result<(), DaemonError> {
 
     // Hauptlogik
     while !term.load(Ordering::Relaxed) {
-        systeminfo::run()?;
+        systeminfo::run();
     }
 
     info!("Daemon shutting down");

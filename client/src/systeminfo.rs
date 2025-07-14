@@ -1,11 +1,10 @@
 use log::info;
+use reqwest::Client;
 use serde_json::json;
 use std::thread::sleep;
 use std::time::Duration;
-use http::request;
 use sysinfo::{Disks, Networks, System};
 use thiserror::Error;
-use http::{Request, Response};
 
 #[derive(Error, Debug)]
 pub enum SystemInfoError {
@@ -13,70 +12,39 @@ pub enum SystemInfoError {
     WriteError(String),
 }
 
-pub fn run() -> Result<(), SystemInfoError> {
-    let mut sys = System::new_all();
-    sys.refresh_all();
-
-    let disks = Disks::new_with_refreshed_list();
-    let disk_info: Vec<_> = disks
-        .iter()
-        .map(|disk| {
-            json!({
-                "name": disk.name().to_string_lossy(),
-                "mount_point": disk.mount_point().to_string_lossy(),
-                "total_space": disk.total_space(),
-                "available_space": disk.available_space(),
-            })
-        })
-        .collect();
-
-    let networks = Networks::new_with_refreshed_list();
-    let network_info: Vec<_> = networks
-        .iter()
-        .map(|(name, data)| {
-            json!({
-                "interface": name,
-                "received": data.total_received(),
-                "transmitted": data.total_transmitted(),
-            })
-        })
-        .collect();
-
-    let payload = json!({
-        "system": {
-            "name": System::name().unwrap_or_default(),
-            "kernel_version": System::kernel_version().unwrap_or_default(),
-            "os_version": System::os_version().unwrap_or_default(),
-            "host_name": System::host_name().unwrap_or_default(),
-            "cpus": sys.cpus().len(),
-        },
-        "memory": {
-            "total_memory": sys.total_memory(),
-            "used_memory": sys.used_memory(),
-            "total_swap": sys.total_swap(),
-            "used_swap": sys.used_swap(),
-        },
-        "disks": disk_info,
-        "networks": network_info,
-    });
-
-    // Schreibe JSON in Log
-    info!(
-        "System info: {}",
-        serde_json::to_string_pretty(&payload)
-            .map_err(|e| SystemInfoError::WriteError(format!("Failed to serialize JSON: {}", e)))?
-    );
-
-    //TODO: Mehr umgebungsvarialben/ env file arbeiten in zukunft
-    let request = http::Request::builder()
-        .uri("http://localhost:3000/api/data/system")
-        .header("system", "json/1.0")
-        .body(payload.to_string())
-        .map_err(|e| SystemInfoError::WriteError(format!("Failed to build request: {}", e)))?;
-
-    let response = send
+pub async fn run() -> Result<(), String> {
+    #[deprecated(since = "0.1.0", note = "Please use Client::builder()")]
+    let client = Client::new();
+    loop {
+        let mut sys = System::new_all();
+        sys.refresh_all();
 
 
-    sleep(Duration::from_secs(5));
-    Ok(())
+        let payload_system = json!({
+            "id": System::host_name(),
+            "kernelVersion": System::kernel_version(),
+            "osVersion": System::os_version(),
+            });
+        println!("{}", payload_system);
+
+
+        let response = client
+            .post("http://localhost:3000/api/data/system")
+            .json(&payload_system)
+            .send()
+            .await.map_err(|e| e.to_string())?;
+
+        // Überprüfe den Statuscode
+        if response.status().is_success() {
+            println!("Antwort: {:?}", response);
+        } else {
+            println!("Fehler: {:?}", response.text().await);
+        }
+
+
+        //TODO: Mehr umgebungsvarialben/ env file arbeiten in zukunft
+
+
+       // sleep(Duration::from_secs(5));
+    }
 }
