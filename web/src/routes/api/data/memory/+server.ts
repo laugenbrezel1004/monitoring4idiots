@@ -5,9 +5,21 @@ export const POST = async ({request}) => {
     const {id, totalMemory, usedMemory, totalSwap, usedSwap} = await request.json();
 
     try {
+        const host = await prisma.host.upsert({
+           where: {
+               name: id,
+           },
+            create: {
+               name: id,
+            },
+            update: {}
+        });
+
+        if(!host) return json({type: 'error', message: `Couldn't upsert host!`}, {status: 500});
+
         const memoryInfo = await prisma.memoryInfo.create({
             data: {
-                hostId: id,
+                hostId: host.id,
                 totalMemory,
                 usedMemory,
                 availableMemory: parseFloat(totalMemory ?? 0) - parseFloat(usedMemory ?? 0),
@@ -19,6 +31,7 @@ export const POST = async ({request}) => {
 
         return json({type: 'success', data: memoryInfo}, {status: 200});
     } catch (err) {
+        console.error(err);
         return json({type: 'error', message: `Couldn't save data!`}, {status: 500});
     }
 }

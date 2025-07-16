@@ -2,7 +2,7 @@ import {json} from "@sveltejs/kit";
 import {prisma} from "$lib/server/prisma";
 
 export const POST = async ({request}) => {
-    const {id, name, mountPoint, totalSpace, availableSpace} = await request.json();
+    const {id, cores, usage} = await request.json();
 
     try {
         const host = await prisma.host.upsert({
@@ -17,17 +17,15 @@ export const POST = async ({request}) => {
 
         if(!host) return json({type: 'error', message: `Couldn't upsert host!`}, {status: 500});
 
-        const diskInfo = await prisma.diskInfo.create({
+        const processorInfo = await prisma.processorInfo.create({
             data: {
                 hostId: host.id,
-                name,
-                mountPoint,
-                totalSpace,
-                availableSpace,
+                cores,
+                usage,
             }
         });
 
-        return json({type: 'success', data: diskInfo}, {status: 200});
+        return json({type: 'success', data: processorInfo}, {status: 200});
     } catch (err) {
         return json({type: 'error', message: `Couldn't save data!`}, {status: 500});
     }
