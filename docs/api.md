@@ -93,8 +93,75 @@ curl -X POST http://localhost:3000/api/data/system \
 ```
 
 ---
+### 2. Processor Information Endpoint
 
-### 2. Memory Information Endpoint
+#### Overview
+Stores memory and swap usage information for a specific host.
+
+- **Endpoint**: `/api/data/processor`
+- **Method**: POST
+
+#### Parameters
+- **Request Body** (JSON, required):
+  - `id` (string, required): Unique identifier for the host (hostname).
+  - `cores` (number, required): Total amount of cores.
+  - `usage` (number, required): Total cpu usage.
+
+#### Response
+- **Success** (HTTP 200):
+  ```json
+  {
+    "type": "success",
+    "data": {
+      "hostId": string (uuid),
+      "cores": number,
+      "usage": number,
+      "createdAt": string (ISO 8601),
+      "updatedAt": string (ISO 8601)
+    }
+  }
+  ```
+- **Error** (HTTP 500):
+  - `{ "type": "error", "message": "Couldn't upsert host!" }`: If the host upsert operation fails.
+  - `{ "type": "error", "message": "Couldn't save data!" }`: If the memory info creation fails (e.g., database error).
+
+#### Example
+**Request**:
+```bash
+curl -X POST http://localhost:3000/api/data/processor \
+-H "Content-Type: application/json" \
+-d '{
+  "id": "ubuntu",
+  "cores": 32,
+  "usage": 80,
+}'
+```
+
+**Response (Success)**:
+```json
+{
+  "type": "success",
+  "data": {
+    "hostId": "1ac0a2f4-785a-448a-998a-5c076d94b32d",
+    "cores": 32,
+    "usage": 80,
+    "createdAt": "2025-07-16T14:01:00.000Z",
+    "updatedAt": "2025-07-16T14:01:00.000Z"
+  }
+}
+```
+
+**Response (Error)**:
+```json
+{
+  "type": "error",
+  "message": "Couldn't save data!"
+}
+```
+
+---
+
+### 3. Memory Information Endpoint
 
 #### Overview
 Stores memory and swap usage information for a specific host.
@@ -174,7 +241,7 @@ curl -X POST http://localhost:3000/api/data/memory \
 
 ---
 
-### 3. Disk Information Endpoint
+### 4. Disk Information Endpoint
 
 #### Overview
 Stores disk usage information for a specific host.
@@ -250,7 +317,7 @@ curl -X POST http://localhost:3000/api/data/disk \
 
 ---
 
-### 4. Network Interface Information Endpoint
+### 5. Network Interface Information Endpoint
 
 #### Overview
 Stores network interface data (received and transmitted) for a specific host.
