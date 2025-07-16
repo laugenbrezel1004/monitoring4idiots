@@ -5,9 +5,21 @@ export const POST = async ({request}) => {
     const {id, name, dataReceived, dataTransmitted} = await request.json();
 
     try {
+        const host = await prisma.host.upsert({
+            where: {
+                name: id,
+            },
+            create: {
+                name: id,
+            },
+            update: {}
+        });
+
+        if(!host) return json({type: 'error', message: `Couldn't upsert host!`}, {status: 500});
+
         const interfaceInfo = await prisma.interfaceInfo.create({
             data: {
-                hostId: id,
+                hostId: host.id,
                 name,
                 dataReceived,
                 dataTransmitted,
